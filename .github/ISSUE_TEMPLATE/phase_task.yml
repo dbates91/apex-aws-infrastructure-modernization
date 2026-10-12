@@ -1,0 +1,33 @@
+name: Bootcamp phase task
+description: Track a scoped Apex deliverable with honest verification.
+title: "[Phase] "
+body:
+  - type: input
+    id: phase
+    attributes:
+      label: Phase and planned week
+      placeholder: "Phase 1 / Week 1"
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Design / implementation objective
+    validations:
+      required: true
+  - type: checkboxes
+    id: gate
+    attributes:
+      label: Verification gate
+      options:
+        - label: Technical build or simulation performed
+        - label: Architecture reasoning and alternatives documented
+        - label: Security and IAM review completed
+        - label: Cost estimate and safe teardown documented
+        - label: Failure analysis and actual verification captured
+        - label: Portfolio evidence and interview explanation linked
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Links to real evidence and known blockers
+      description: Never supply fabricated verification or screenshots.

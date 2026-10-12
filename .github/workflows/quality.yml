@@ -1,0 +1,81 @@
+name: Apex CI — static checks only, never deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    name: Offline Python tests / documentation / Bash syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Python unit tests (loopback only)
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Documentation structure
+        run: python scripts/python/check_docs.py
+      - name: Bash syntax
+        run: bash -n scripts/bash/*.sh
+
+  terraform-static:
+    name: Terraform formatting and validation — no apply
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: '1.14.6'
+      - name: Terraform format check
+        run: terraform fmt -check -recursive terraform
+      - name: Init safe dev root (no backend)
+        working-directory: terraform/environments/dev
+        run: terraform init -backend=false -input=false -no-color
+      - name: Validate safe dev root
+        working-directory: terraform/environments/dev
+        run: terraform validate -no-color
+      - name: Init isolated draft module (no backend)
+        working-directory: terraform/modules/networking
+        run: terraform init -backend=false -input=false -no-color
+      - name: Validate isolated networking module
+        working-directory: terraform/modules/networking
+        run: terraform validate -no-color
+
+  security-hard-gate:
+    name: Secret scanning — blocking
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  iac-security-review:
+    name: IaC security findings — advisory until triage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Checkov - track findings before enforcing policy
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform/
+          framework: terraform
+          output_format: cli
+          quiet: true
+          soft_fail: true
+
+# No AWS credentials, no Terraform apply/destroy, no live infrastructure change.

@@ -1,21 +1,15 @@
-# Dev — Non-provisioning Terraform Scaffold
+# Dev — Safe starter root
 
-This directory intentionally contains **provider configuration, variables and outputs only**, with **no AWS resource or data blocks**. It is not a deployed network, compute stack or a configured remote-state backend.
+This root configures only the AWS provider and a status output. **It has no resources, data sources, module calls, backend or deployed infrastructure.**
 
-## Intended configuration
+`terraform/modules/networking` contains proposed resource definitions but is **not invoked here**. Terraform validation of the module is separate and does not create infrastructure.
 
-- `versions.tf`: Terraform and AWS provider constraints; uses ambient credentials.
-- `variables.tf`: Region and tags.
-- `outputs.tf`: explicit string explaining that no resources are defined.
+Do not wire the module into the root until the Phase 0 account audit, regional estimates, IAM/security review, egress/SSM design and resource teardown checklist are approved. Consult [roadmap](../../../PROJECT_ROADMAP.md).
 
-For future local validation, inspect files first, then use:
+Local static commands (examples, not observed results):
 
 ```bash
 terraform fmt -check
-terraform init -backend=false
+terraform init -backend=false -input=false
 terraform validate
-terraform plan
 ```
-
-No tests have been executed or verified by merely initializing the GitHub repository. **Do not run terraform apply.** Later add module calls with justified dependencies, price estimates and verified output evidence.
-

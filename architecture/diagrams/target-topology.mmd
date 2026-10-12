@@ -1,0 +1,21 @@
+flowchart TB
+  visitor["Client"] --> route53["Route 53 (optional)"]
+  route53 --> alb["ALB / TLS via ACM (planned)"]
+  subgraph vpc["10.0.0.0/16 VPC — AZ A and AZ B"]
+    subgraph public["Public subnet pair"]
+      alb
+      nat["NAT decision pending"]
+    end
+    subgraph app["Private application subnet pair"]
+      ec2["EC2 Auto Scaling / AL2023"]
+    end
+    subgraph database["Private database subnet pair"]
+      rds[("RDS optional")]
+    end
+    alb --> ec2
+    ec2 -.-> rds
+    ec2 -. approved egress only .-> nat
+  end
+  ssm["Systems Manager / IAM"] -.-> ec2
+  ec2 -. logs & metrics .-> cloudwatch["CloudWatch"]
+  cloudwatch --> sns["SNS"]

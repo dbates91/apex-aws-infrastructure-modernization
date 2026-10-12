@@ -1,8 +1,9 @@
-# Python Operations
+# Python operations and verification
 
-`check_docs.py` verifies that the project-documentation scaffold contains required paths. It is read-only, uses only the Python standard library, and does **not** interact with AWS.
+- [check_docs.py](check_docs.py): local read-only required-path check.
+- [estimate_costs.py](estimate_costs.py): offline cost arithmetic using **user-provided verified unit rates**, with no AWS calls. See [pricing template](../../docs/costs/pricing-input.example.json).
+- [inventory_ec2.py](inventory_ec2.py): explicit-profile/Region *read-only* AWS CLI query tool; **dry-run by default** and never assumes credentials or a running Apex deployment.
 
-Example: `python3 scripts/python/check_docs.py`.
+Offline tests: `python3 -m unittest discover -s tests -p 'test_*.py' -v` from repository root.
 
-Future scripts may use boto3 for **explicitly scoped, read-only** inventory and CloudWatch checks, with documented IAM permissions, redaction, tests and cost considerations.
-
+Later operational scripts should follow least privilege, request explicit scope, have bounded retries, sanitize results, never leak secrets or silently mutate AWS.

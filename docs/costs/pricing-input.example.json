@@ -1,0 +1,11 @@
+{
+  "currency": "USD",
+  "scenario": "Proposed short VPC + ALB lab; rates must be verified",
+  "items": [
+    {"service": "NAT Gateway hourly", "units": 4, "unit_rate_usd": null},
+    {"service": "Application Load Balancer hourly", "units": 4, "unit_rate_usd": null},
+    {"service": "EC2 hourly", "units": 4, "unit_rate_usd": null},
+    {"service": "Public IPv4 hourly", "units": 4, "unit_rate_usd": null},
+    {"service": "Data transfer (GB)", "units": 1, "unit_rate_usd": null}
+  ]
+}

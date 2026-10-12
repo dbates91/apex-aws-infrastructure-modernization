@@ -1,121 +1,108 @@
 # Apex — AWS Infrastructure Modernization & Cost Optimization
 
-> **Status: design and repository initialization. No Apex AWS infrastructure has been provisioned, deployed, validated, or benchmarked.** All AWS services, architectures, availability claims, and outcomes described below are **targets**, not completed work.
+**Status: implementation not deployed** · **Six-week AWS Cloud Engineering Bootcamp** · **Target roles: AWS Cloud Support / Junior CloudOps / Cloud Engineer**
 
-**Apex** is a production-inspired AWS Cloud Engineering portfolio project documenting the design, implementation, secure operation, troubleshooting, and cost optimization of a small Linux-based web application on AWS. It is an independent project and is **not** the existing `aws-three-tier-architecture-lab` repository.
+Apex is a **production-inspired, cost-conscious cloud modernization case study**: take a hypothetical manually managed Linux web service and design a secure, observable, reproducible AWS architecture. The business scenario is fictional; this is an independent portfolio project, not a deployed production service.
 
-**Career focus:** AWS Cloud Support Associate → Junior CloudOps Engineer → Cloud Engineer. Coursework alignment: AWS Solutions Architect – Associate (SAA-C03) preparation and future Terraform Associate study. Neither certification is represented as earned.
+> **Truth in engineering:** No Apex cloud resources have been provisioned or benchmarked. The initial code is a local web-service sample and **unattached Terraform networking module**; all cloud deployment phases remain **Not Started** until independently verified.
 
-## Business problem
+## At a glance
 
-**Simulated business scenario:** A small application relies on manual infrastructure changes, has limited resilience, inconsistent operational visibility, and lacks repeatable deployment and spend controls. Apex proposes a phased AWS modernization with secure network boundaries, repeatable infrastructure definitions, incident response runbooks, and measurable operational evidence. This scenario does not describe an actual client or live production workload.
+| Capability | Engineering target | Verified state |
+| --- | --- | --- |
+| AWS networking | 10.0.0.0/16 VPC, public/app/DB subnets in two AZs, IGW, NAT/endpoints as justified | Planned; module source drafted, **not applied** |
+| Compute / operations | Private Amazon Linux 2023 EC2, IAM instance profile, SSM and `systemd` | Not deployed |
+| Availability | Public HTTPS ALB, private targets, ASG across AZs, controlled failure drills | Not deployed or tested |
+| Application | Small Python HTTP app with `/health`, later hosted on Linux/Docker | Source included; cloud deployment pending |
+| Infrastructure as code | Terraform modules, reviewed plans, protected state and drift analysis | Starter code only; no resources applied |
+| Containers | Dockerfile, local image verification, later ECR and optional ECS/Fargate | Definition included; no build/deployment claimed |
+| Security / audit | Scoped SG rules, least-privilege IAM, IMDSv2, encryption, CloudTrail / Flow Logs | Documentation and static checks; AWS controls not enabled |
+| Observability / response | CloudWatch / SNS, runbooks, verified incident tickets | Planned |
+| FinOps | Service estimates, resource tagging, teardown, before/after measurements | Planning templates; no actual AWS cost data |
 
-**Engineering outcomes to demonstrate when implemented:**
-- Segregate a VPC across two Availability Zones and public, private application, and private database subnet tiers.
-- Restrict Internet-facing access to the load balancer; manage private compute with AWS Systems Manager.
-- Build an AL2023-hosted application with a health endpoint, then evaluate ALB and Auto Scaling.
-- Encode resources using Terraform with reviewable plans, modular definitions, remote-state controls, and drift checks.
-- Add observability, scripted automation, safe incident simulations, reproducible tests, and a documented teardown.
-- Record real cost/availability findings only after verified tests.
-
-## Target architecture — conceptual, not deployed
+## Architecture — proposed, not deployed
 
 ```mermaid
-flowchart TD
-  Visitor[Client / HTTPS] --> DNS[Route 53 DNS]
-  DNS --> ALB[Public ALB + ACM certificate]
-  subgraph VPC["VPC 10.0.0.0/16 — two AZs"]
-    subgraph PUB["Public subnets — AZ A & B"]
+flowchart TB
+  Client["Client HTTPS"] --> DNS["Route 53 (optional)"]
+  DNS --> ALB["Application Load Balancer + ACM (planned)"]
+  subgraph VPC["VPC 10.0.0.0/16 | two Availability Zones"]
+    subgraph PUB["Public subnets / two AZs"]
       ALB
-      NAT[Optional NAT per AZ]
+      NAT["NAT Gateway(s) — cost decision pending"]
     end
-    subgraph APP["Private application subnets — AZ A & B"]
-      ASG[AL2023 EC2 Auto Scaling Group]
+    subgraph APP["Private app subnets / two AZs"]
+      ASG["Amazon Linux 2023 EC2 ASG"]
     end
-    subgraph DB["Private database subnets — AZ A & B"]
-      RDS[(RDS — optional advanced deployment)]
+    subgraph DATA["Private DB subnets / two AZs"]
+      RDS[("RDS / Multi-AZ optional")]
     end
-    ALB --> ASG
-    ASG --> RDS
-    ASG -. outbound if required .-> NAT
+    ALB -->|"Scoped app port"| ASG
+    ASG -. "Scoped DB port" .-> RDS
+    ASG -. "Approved outbound only" .-> NAT
   end
-  ASG --> LOGS[CloudWatch logs, metrics and alarms]
-  LOGS --> SNS[SNS notifications]
-  SSM[Systems Manager / IAM roles] -. private administration .-> ASG
-  TF[Terraform modules / environments] -. planned IaC .-> VPC
+  TF["Terraform (source only)"] -. "Future deployment" .-> VPC
+  SSM["IAM instance profile + SSM"] -. "Private administration" .-> ASG
+  ASG -. "Logs/metrics" .-> CW["CloudWatch / CloudTrail / Flow Logs"]
+  CW -. "Alarms" .-> SNS["SNS notification"]
 ```
 
-The diagram omits exact routes, endpoint placement, permissions, storage, and log destinations. These must be defined and verified when implemented; see [architecture](architecture/README.md).
+**Ingress:** HTTPS via the ALB; no broad internet SSH to private instances. **Administration:** SSM Agent + IAM and a verified outbound path (NAT or appropriate endpoints). **Data:** private and encrypted if implemented. A two-AZ design is an *objective*, not measured uptime. Read [network plan](architecture/networking-plan.md) and [architecture tradeoffs](architecture/README.md).
 
-## Planned stack
+## Engineering workflow
 
-| Capability | Planned AWS services / tooling | Actual state |
-| --- | --- | --- |
-| Networking | VPC 10.0.0.0/16, two AZs, six subnets, IGW, route tables, NAT choice, VPC endpoints | Design only |
-| Compute | EC2, Amazon Linux 2023, launch templates, ALB, Auto Scaling | Not deployed |
-| Admin and security | IAM, instance profiles, Systems Manager, security groups, IMDSv2, EBS encryption | Not configured |
-| Application / DNS | HTTP app, /health, Route 53, ACM, TLS | Not deployed |
-| Database | RDS in private DB subnets; Multi-AZ optional | Not deployed |
-| Infrastructure as Code | Terraform, providers, variables, outputs, modules, state controls | Non-deploying starter files only |
-| Containers | Docker, Dockerfile, ECR, optional ECS/Fargate | Planned |
-| Observability | CloudWatch, CloudTrail, VPC Flow Logs, SNS | Not configured |
-| Automation | Bash, Python, AWS CLI; GitHub Actions later | Safe local starter checks / plans |
+1. **Learn** the AWS service, Linux concept, and tradeoffs.
+2. **Build** the smallest approved lab, first using the console only when it teaches the underlying resource.
+3. **Rebuild in Terraform** with a reviewed plan; do not accidentally manage the same resource in two places.
+4. **Troubleshoot** controlled failures using metrics, logs, CLI and runbooks.
+5. **Explain & repeat**, with sanitized command evidence, observed costs, teardown, and an interview-ready summary.
 
-## Security design
+**Six-week plan:** [Weekly outcomes](BOOTCAMP_SIX_WEEK_PLAN.md) → [11-phase roadmap](PROJECT_ROADMAP.md) → [status and verification tracker](PROJECT_TRACKER.md). RDS Multi-AZ and ECS/Fargate are stretch goals, not prerequisites.
 
-Planned public ingress is HTTPS on the ALB (443); private application instance access is limited to the ALB security group; RDS access is limited to the application security group on its required port. There will be **no inbound SSH from 0.0.0.0/0**, no public IP addresses on private application or database instances, and no credentials stored in this repository. IAM instance roles will use least privilege and IMDSv2; at-rest encryption will be enabled for EBS and RDS. Private Systems Manager administration depends on SSM Agent, IAM, and either NAT connectivity or the correct interface VPC endpoints. Validate all assumptions rather than assuming Session Manager works by default.
+## Try the local application (no AWS account needed)
 
-For eventual AWS access, use MFA, short-lived credentials, and explicit permission boundaries. CloudTrail and VPC Flow Logs are planned audit sources, not claims of active data collection. [Security policy](SECURITY.md).
+```bash
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+python3 application/server.py
+# In another terminal:
+curl -i http://127.0.0.1:8080/health
+```
 
-## High availability and cost tradeoffs
+The HTTP sample uses Python's standard library and synthetic responses. Commands above are *instructions*, not claimed test results. You may also run `docker build -f docker/Dockerfile -t apex-local .` **locally**; no image build has been verified on GitHub.
 
-The intended HA demonstration places an internet-facing ALB and application targets across two AZs, with application health checks and recovery policies. A one-NAT-gateway lab variant may save money but creates an AZ-related outbound dependency; per-AZ NAT costs more. Database Multi-AZ and ECS/Fargate are advanced, optional expansions. Actual HA is **not claimed** until tested under failure conditions.
+## Terraform (non-deploying root)
 
-A personal AWS account can incur costs for NAT Gateways, public IPv4, ALB, EC2, EBS, RDS, CloudWatch, VPC interface endpoints, data transfer, Route 53, and logging. AWS Budgets alerts are **not spending caps**. Defer billable deployments pending cost approval, estimate and teardown planning. [Cost policy](COST_MANAGEMENT.md).
+`terraform/environments/dev/` contains only provider configuration and an informational output; it references **no modules or resources**. `terraform/modules/networking/` contains *draft* VPC/subnet/route/SG source code, but it is deliberately not attached to the dev root. This prevents an accidental `terraform apply` from provisioning the planned VPC at this stage.
 
-## Linux, application and containers
+```bash
+terraform fmt -check -recursive terraform
+cd terraform/environments/dev
+terraform init -backend=false -input=false
+terraform validate
+```
 
-The Linux track covers Amazon Linux 2023, users and permissions, package management, `systemd`, logs, processes, service health, DNS, networking, and no-SSH private-instance troubleshooting. The application will expose `/health` for ALB checks and use synthetic data. Docker is initially local; versioned images and ECR come later, with optional ECS/Fargate after cost review.
+**Do not run `terraform apply` until Phase 0 account/budget approval and explicit implementation review.** Remote state is not configured; avoid committing secrets, .tfstate or plans. CI runs only local static checks, Terraform validation and secret scanning, with **no cloud deployment**.
 
-## Terraform strategy
+## Security, cost, and operational proof
 
-[terraform/](terraform/README.md) starts with an intentionally **non-provisioning** dev configuration: required provider, variables and outputs, **no AWS resources**. In Phase 4, introduce versioned, reusable modules; review `terraform fmt`, `validate`, and `plan` outputs; prohibit committing state and secrets; evaluate a protected, encrypted, versioned S3 backend with locking. Manual deployment in earlier phases is a learning exercise; Terraform later becomes the desired source of truth. **Do not run `terraform apply` at repository setup.**
-
-## Monitoring, incident response and proof
-
-Future CloudWatch metrics/logs/alarms, SNS notifications, scoped CloudTrail audit data, and Flow Logs will support incident drills. Example scenarios: incorrect routes, unhealthy ALB target, SSM connection failure, stopped web service, misconfigured security groups, and configuration drift. Every completed phase needs reproducible evidence, sanitized captures if appropriate, and a runbook—never invented metrics or screenshots.
-
-## Six-week bootcamp sequence
-
-| Week | Project phases | Focus |
-| --- | --- | --- |
-| 1 | 0–1 | Planning, budget audit, CIDR planning, networking |
-| 2 | 2 | EC2, Linux admin, IAM instance profile, SSM |
-| 3 | 3–4 | Web app, ALB, ASG, Terraform implementation |
-| 4 | 5 | Docker, ECR, optional container service |
-| 5 | 6–7 | Monitoring, auditing, Bash/Python automation |
-| 6 | 8–10 | CloudOps incidents, recovery, optimization, documentation |
-
-A six-week learning structure does not require deploying every expensive architecture variant. Advance only through verified acceptance criteria. [Full roadmap](PROJECT_ROADMAP.md) and [progress tracker](PROJECT_TRACKER.md).
+- [Security policy](SECURITY.md): least privilege, encryption, IMDSv2, reviewable changes and redaction.
+- [Cost management](COST_MANAGEMENT.md): NAT, ALB, public IPv4, EC2/EBS, RDS, endpoints, logging, transfer and teardown; budgets alert but don't cap spend.
+- [CI checks](.github/workflows/quality.yml): Python tests, Bash syntax, Terraform formatting/validation and security scanning; workflow execution status is visible in GitHub Actions, not asserted here.
+- [Incident templates](docs/troubleshooting/README.md) and [runbooks](docs/runbooks/README.md): symptom → evidence → isolate → fix → validate → prevent.
+- [Architecture decisions](docs/architecture-decisions/README.md): record meaningful choices, their alternatives and risks.
+- [Portfolio case study](docs/portfolio/CASE_STUDY.md): recruiter-friendly evidence log, placeholders until confirmed.
 
 ## Repository navigation
 
-| Path | Purpose |
+| Directory | Contents |
 | --- | --- |
-| [architecture/](architecture/README.md) | Proposed subnet design, security boundaries and tradeoffs |
-| [terraform/](terraform/README.md) | Non-provisioning IaC scaffold and future module strategy |
-| [linux/](linux/README.md) | Administration and troubleshooting labs |
-| [application/](application/README.md) | Future app contract and health checks |
-| [docker/](docker/README.md) | Image lifecycle, ECR and optional ECS |
-| [scripts/](scripts/README.md) | Local checks, future Bash/Python/AWS CLI tools |
-| [docs/](docs/README.md) | Deployments, runbooks, incident records and architecture decisions |
-| [screenshots/](screenshots/README.md) | Evidence-handling and redaction rules |
-| [PROJECT_ROADMAP.md](PROJECT_ROADMAP.md) | Phase 0 through Phase 10 criteria |
-| [PROJECT_TRACKER.md](PROJECT_TRACKER.md) | Phase status and links to proof |
-| [COST_MANAGEMENT.md](COST_MANAGEMENT.md) | Cost guardrails and teardown |
-| [LEARNING_OBJECTIVES.md](LEARNING_OBJECTIVES.md) | Learn → Build → Troubleshoot → Explain → Repeat |
+| [architecture/](architecture/README.md) | Proposed topology, CIDRs, risk/tradeoffs, diagram source |
+| [terraform/](terraform/README.md) | Environments, networking-module source, module contracts |
+| [application/](application/README.md) and [tests/](tests/README.md) | Runnable local health-check application and tests |
+| [docker/](docker/README.md) | Dockerfile and future ECR/ECS operations |
+| [linux/](linux/README.md) | Amazon Linux 2023 operations labs |
+| [scripts/](scripts/README.md) | Preflight/documentation checks and future CLI operations |
+| [docs/](docs/README.md) | Runbooks, incident reports, deployment records, decisions and portfolio |
+| [screenshots/](screenshots/README.md) | Redaction/evidence policy |
 
-## Current status
-
-**Repository scaffold and documentation being initialized.** All implementation phases remain **Not Started** until directly verified. No AWS infrastructure provisioned; no AWS charges, screenshots, availability results, load tests, or certifications are claimed. The first actual engineering gate is Phase 0: account and cost audit, architecture design, and test-window approval.
-
+**Project maturity:** Foundation and source examples, not a deployed AWS solution. This repo intentionally makes planned vs verified work obvious to technical interviewers. Certifications are learning goals—not represented as earned.

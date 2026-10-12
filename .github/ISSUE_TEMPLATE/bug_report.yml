@@ -1,0 +1,40 @@
+name: CloudOps incident or bug
+description: Report a verifiable issue or a clearly labeled simulated incident.
+title: "[Incident] "
+labels: []
+body:
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Do not misrepresent a hypothetical scenario as a live incident.
+      options:
+        - Local test
+        - Approved AWS lab
+        - Proposed scenario (not reproduced)
+    validations:
+      required: true
+  - type: textarea
+    id: symptoms
+    attributes:
+      label: Symptoms and scope
+      description: Exact observed errors, sanitized logs, date and impact.
+    validations:
+      required: true
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: Diagnosis and competing hypotheses
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Resolution and actual verification
+      description: Say "Not executed" if a proposed check has not been run.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Security, cost and rollback considerations

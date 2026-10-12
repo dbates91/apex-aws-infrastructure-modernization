@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6.0, < 2.0.0"
+  required_version = ">= 1.10.0, < 2.0.0"
 
   required_providers {
     aws = {
@@ -9,8 +9,7 @@ terraform {
   }
 }
 
-# Intentional scaffold: no AWS resources, data sources, or backend are configured.
-# Authenticate with short-lived AWS credentials only when a later phase requires it.
+# Safe root: no AWS resources, data sources, backend, or module calls.
 provider "aws" {
   region = var.aws_region
 
@@ -22,4 +21,3 @@ provider "aws" {
     }
   }
 }
-

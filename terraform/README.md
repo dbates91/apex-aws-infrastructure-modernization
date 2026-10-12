@@ -1,30 +1,23 @@
-# Apex — Terraform Infrastructure as Code
+# Terraform — non-deploying environment and draft modules
 
-**Current state:** starter configuration only; it declares **zero AWS resources**. No Terraform apply has been run as part of creating this repository.
+- [environments/dev](environments/dev/README.md): provider-only root; **no module calls, resources or state backend**.
+- [modules/networking](modules/networking/README.md): draft resource definitions for a two-AZ VPC, route tables and scoped example security groups; **unattached to the dev root**.
+- [modules/compute](modules/compute/README.md) and [modules/observability](modules/observability/README.md): design placeholders for later phases.
 
-## Layout
+**Terraform begins as a learning tool in Week 1**; Phase 4 is the integration and repeatability gate. The project requires budgeting, approved AWS Region/AZs, endpoint/egress design, state management and teardown approval **before any apply**.
 
-- [environments/dev/](environments/dev/README.md): non-provisioning development root, provider constraints, variables, outputs.
-- [modules/](modules/README.md): documentation placeholders for future networking, compute and observability modules.
-- Later modules may be composed into environments once the phase specifications and budget are approved.
-
-## Local static workflow (future, on your workstation)
+## Static validation commands (not yet claimed as run)
 
 ```bash
+terraform fmt -check -recursive terraform
 cd terraform/environments/dev
-terraform fmt -check -recursive
-terraform init -backend=false
+terraform init -backend=false -input=false
 terraform validate
-terraform plan
+cd ../../modules/networking
+terraform init -backend=false -input=false
+terraform validate
 ```
 
-**These commands are examples, not execution claims.** Terraform init downloads provider plugins; a plan can access AWS or evaluate data sources after resources are added, so inspect the code and use a securely configured identity. **Do not run `terraform apply` or `destroy` without an approved cost and teardown plan.** Keep Terraform state and plans out of Git; commit the provider lock file when created.
+CI will run equivalent static commands after workflow publication. The root intentionally declares zero AWS resources so accidental root-level `terraform apply` will not deploy Apex resources; **never use apply at setup**.
 
-## State and provider security
-
-A versioned, encrypted S3 backend with tightly scoped bucket permissions and native S3 state locking is a *future* design task; remote state, backend credentials, and locking are **not configured** here. Design for serialized changes and manual plan review. Do not commit `.tfstate`, plan files, private `.tfvars`, provider caches, private keys or credentials. Authenticate using short-lived identity and IAM least privilege, not access keys hardcoded in `provider` blocks.
-
-## Drift practice
-
-When AWS resources exist, compare configuration and real infrastructure using controlled `terraform plan -refresh-only` for observation and an ordinary plan for desired-state differences. Never uncritically apply drift fixes: investigate the manual change and business impact first.
-
+Use short-lived credentials when actually working with AWS. State files and variable-value files are ignored; commit `.terraform.lock.hcl` when dependency locks are produced in a reviewed local environment. Later select an encrypted, versioned S3 backend with locking, restricted IAM, change approvals and drift-review practice. Do not commit plans or state; never run unreviewed CI applies.
