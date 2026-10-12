@@ -1,0 +1,55 @@
+# Terraform state, caches, plans, override files, crash reports
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.*
+*.plan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Actual variable-value files (commit sanitized .example files only)
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+!*.tfvars.example
+# IMPORTANT: .terraform.lock.hcl SHOULD be committed once generated
+
+# AWS credentials, private keys, secrets, env files
+.aws/
+.aws-*/
+aws-credentials*
+credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa*
+id_ed25519*
+.env
+.env.*
+!.env.example
+credentials.json
+secrets.json
+secrets.yml
+secrets.yaml
+*.kubeconfig
+
+# Local editor, Python, temporary outputs
+.DS_Store
+.idea/
+.vscode/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.log
+*.zip
+
