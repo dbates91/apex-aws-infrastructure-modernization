@@ -1,13 +1,9 @@
-# Apex CI controls
+# Apex GitHub Actions
 
-`quality.yml` runs on `main`, pull requests and manual dispatch.
+- [quality.yml](quality.yml): **blocking** offline unit tests, Bash syntax, documentation, Terraform formatting/validation, and Gitleaks secret scanning; **advisory** Checkov Terraform security scan until its findings are reviewed and fixed.
+- [tflint.yml](tflint.yml): TFLint language rules over the Terraform source tree, no account access.
+- [Dependabot configuration](../dependabot.yml): proposes dependency/action updates as PRs; it does not automatically deploy infrastructure.
 
-- **Blocking:** local Python unit tests, documentation-path checks, Bash syntax, Terraform formatting and validation of the unattached module, Gitleaks secret scanning.
-- **Advisory initially:** Checkov static findings for Terraform source. Review findings before promoting this job to a hard security gate. This is not a guarantee that AWS resources are secure.
-- **No deployment:** workflow has `contents: read` permissions, no AWS credentials, no cloud CLI and **no terraform apply/destroy**.
+The workflows use read-only repository permissions. There are no AWS credentials, OIDC deployment permissions, Terraform applies/destroys, or cloud changes. CI can validate syntax and catch some policy errors; it does not prove the planned two-AZ infrastructure exists or works.
 
-**Security caveat:** The networking module has draft IAM/network dependencies, no SSM egress, no VPC Flow Logs, and no resources actually deployed. Treat Checkov findings as work items, not as a passing security review.
-
-Future CI extensions after verified development: Docker build/test, TFLint, policy-as-code exception workflow, deterministic provider lock files, SARIF reports, protected branches, reviewed OIDC read-only plans (not automatic apply).
-
-Check actual [GitHub Actions runs](../../actions) before reporting tests as passed.
+Use [GitHub Actions](../../actions) to see **actual** job outcomes. Promote Checkov to a hard gate after reviewing security findings and exceptions; additional AWS rules and image scans belong in later stages.

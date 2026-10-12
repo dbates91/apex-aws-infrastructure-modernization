@@ -1,0 +1,29 @@
+name: Terraform lint — no AWS deployment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: TFLint static Terraform review
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.64.0
+      - name: Initialize TFLint (Terraform language rules only)
+        working-directory: terraform
+        run: tflint --init
+      - name: Lint all Terraform roots/modules
+        working-directory: terraform
+        run: tflint --recursive --format compact
+
+# No AWS credentials, terraform apply, or service provisioning.
