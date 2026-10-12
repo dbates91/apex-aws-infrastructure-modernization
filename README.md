@@ -1,6 +1,6 @@
 # Apex — AWS Infrastructure Modernization & Cost Optimization
 
-**Status: implementation not deployed** · **Six-week AWS Cloud Engineering Bootcamp** · **Target roles: AWS Cloud Support / Junior CloudOps / Cloud Engineer**
+**Status: implementation not deployed** · [CI: passing static checks](https://github.com/dbates91/apex-aws-infrastructure-modernization/actions/runs/38218409414) · **Six-week AWS Cloud Engineering Bootcamp** · **Target roles: AWS Cloud Support / Junior CloudOps / Cloud Engineer**
 
 Apex is a **production-inspired, cost-conscious cloud modernization case study**: take a hypothetical manually managed Linux web service and design a secure, observable, reproducible AWS architecture. The business scenario is fictional; this is an independent portfolio project, not a deployed production service.
 

@@ -23,9 +23,9 @@ Two-AZ private app architecture behind a public HTTPS ALB, SSM management instea
 
 | Milestone | Verified result | Evidence URL |
 | --- | --- | --- |
-| GitHub project initialization | Repository files present | Link to commit in GitHub history |
+| GitHub project initialization | Files published to main | [Initial foundation commit](https://github.com/dbates91/apex-aws-infrastructure-modernization/commit/ce7108714c0ce172eb73721c4f0056368030e9ef) |
 | AWS network and instances | Not deployed | — |
-| CI checks | Results to be read from GitHub Actions | — |
+| CI checks | Four GitHub jobs completed successfully; Checkov scan is **advisory**, not a blocking security pass | [First run](https://github.com/dbates91/apex-aws-infrastructure-modernization/actions/runs/38218409414) |
 | Linux / containers | No deployment test yet | — |
 | Recovery tests | Not performed | — |
 | Spend and teardown | No Apex AWS usage measured | — |

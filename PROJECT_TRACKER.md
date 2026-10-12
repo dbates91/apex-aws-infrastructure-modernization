@@ -11,17 +11,17 @@
 
 | Phase | Scope | Status | Actual evidence / PR | Verified date |
 | --- | --- | --- | --- | --- |
-| 0 | Repository, architecture, account audit, budget | Not Started | — | — |
-| 1 | VPC, subnets, routes, IGW, SGs | Not Started | — | — |
-| 2 | EC2, AL2023, IAM, SSM, Linux | Not Started | — | — |
-| 3 | Web app, ALB, ASG | Not Started | — | — |
-| 4 | Terraform and repeatable deployment | Not Started | — | — |
-| 5 | Docker, ECR, optional ECS | Not Started | — | — |
-| 6 | CloudWatch, CloudTrail, logs, alarms | Not Started | — | — |
-| 7 | Bash/Python operational automation | Not Started | — | — |
-| 8 | CloudOps incident simulations | Not Started | — | — |
-| 9 | Recovery, failure tests, cost review | Not Started | — | — |
-| 10 | Portfolio docs and interview presentations | Not Started | — | — |
+| [0](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/1) | Repository, architecture, account audit, budget | Not Started | — | — |
+| [1](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/2) | VPC, subnets, routes, IGW, SGs | Not Started | — | — |
+| [2](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/3) | EC2, AL2023, IAM, SSM, Linux | Not Started | — | — |
+| [3](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/4) | Web app, ALB, ASG | Not Started | — | — |
+| [4](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/5) | Terraform and repeatable deployment | Not Started | — | — |
+| [5](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/6) | Docker, ECR, optional ECS | Not Started | — | — |
+| [6](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/7) | CloudWatch, CloudTrail, logs, alarms | Not Started | — | — |
+| [7](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/8) | Bash/Python operational automation | Not Started | — | — |
+| [8](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/9) | CloudOps incident simulations | Not Started | — | — |
+| [9](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/10) | Recovery, failure tests, cost review | Not Started | — | — |
+| [10](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/11) | Portfolio docs and interview presentations | Not Started | — | — |
 
 ## Phase evidence template
 
@@ -42,3 +42,9 @@
 | --- | --- | --- | --- | --- |
 | — | — | — | — | No verified implementation yet |
 
+
+## Repo-wide foundation verification (not phase completion)
+
+- 2026-10-12: [First CI run](https://github.com/dbates91/apex-aws-infrastructure-modernization/actions/runs/38218409414) completed successfully across four jobs: Python offline unit tests/documentation/Bash syntax, Terraform formatting and validation, Gitleaks secret scanning, and an **advisory** Checkov run. Passing the advisory job does **not** mean every IaC policy check passed.
+- No AWS provisioning, NAT/ALB/RDS deployment, Docker image build, endpoint connection, GitHub Project board, or actual failure drill was verified in this CI run.
+- All implementation phases remain **Not Started**; Phase 0's AWS account audit and budget gate are still pending.
