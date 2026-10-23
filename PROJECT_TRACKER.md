@@ -1,6 +1,6 @@
 # Apex — Project Progress Tracker
 
-**Tracking rule:** The repository and draft documents exist, but no phase is complete until its implementation, real verification, risk/cost review, and evidence have been recorded. Do not infer progress from file presence.
+**Tracking rule:** A live VPC and four subnets have been applied, but no phase is complete until implementation, independent verification, risk/cost review and evidence are recorded. Do not infer progress from file presence. [Network verification checklist](docs/deployment/NETWORK_VERIFICATION.md) · [Resume evidence](docs/portfolio/RESUME_EVIDENCE.md).
 
 ## Allowed statuses
 
@@ -12,7 +12,7 @@
 | Phase | Scope | Status | Actual evidence / PR | Verified date |
 | --- | --- | --- | --- | --- |
 | [0](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/1) | Repository, architecture, account audit, budget | Not Started | — | — |
-| [1](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/2) | VPC, subnets, routes, IGW, SGs | **In Progress** | VPC + four subnets: Terraform apply logs; [INC-001 remediation](docs/troubleshooting/INC-001-local-zone-subnet-placement.md). Remaining route/IGW/SG work and independent post-fix verification pending. Terraform code is local, not yet pushed. | 2026-10-22 (apply observed; final CLI verification pending) |
+| [1](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/2) | VPC, subnets, routes, IGW, SGs | **In Progress** | VPC + four subnets: Terraform apply logs; [INC-001 remediation](docs/troubleshooting/INC-001-local-zone-subnet-placement.md). [CLI verification](docs/deployment/NETWORK_VERIFICATION.md), source push, IGW/routes/SG work still pending. | 2026-10-22 (apply observed; final CLI verification pending) |
 | [2](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/3) | EC2, AL2023, IAM, SSM, Linux | Not Started | — | — |
 | [3](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/4) | Web app, ALB, ASG | Not Started | — | — |
 | [4](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/5) | Terraform and repeatable deployment | Not Started | — | — |
@@ -35,6 +35,14 @@
 **Docs, sanitized screenshots, commit or PR:** TBD  
 **60–90 second interview explanation:** TBD  
 **Remaining risks / next action:** TBD
+
+## Current immediate acceptance gates
+
+- [ ] Capture read-only AWS subnet results after Local Zone remediation.
+- [ ] Capture a no-drift Terraform plan against the original local state.
+- [ ] Commit and push the actual local Terraform source; confirm state and credentials remain excluded.
+- [ ] Validate custom IGW/public/private route tables only **after** deployment.
+- [ ] Reconcile cost/security review and scope with Phase 1 requirements.
 
 ## Change log
 
