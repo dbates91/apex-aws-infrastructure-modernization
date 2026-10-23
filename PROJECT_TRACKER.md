@@ -12,7 +12,7 @@
 | Phase | Scope | Status | Actual evidence / PR | Verified date |
 | --- | --- | --- | --- | --- |
 | [0](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/1) | Repository, architecture, account audit, budget | Not Started | — | — |
-| [1](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/2) | VPC, subnets, routes, IGW, SGs | Not Started | — | — |
+| [1](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/2) | VPC, subnets, routes, IGW, SGs | **In Progress** | VPC + four subnets: Terraform apply logs; [INC-001 remediation](docs/troubleshooting/INC-001-local-zone-subnet-placement.md). Remaining route/IGW/SG work and independent post-fix verification pending. Terraform code is local, not yet pushed. | 2026-10-22 (apply observed; final CLI verification pending) |
 | [2](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/3) | EC2, AL2023, IAM, SSM, Linux | Not Started | — | — |
 | [3](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/4) | Web app, ALB, ASG | Not Started | — | — |
 | [4](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/5) | Terraform and repeatable deployment | Not Started | — | — |
@@ -40,11 +40,11 @@
 
 | Date | Phase | What changed | Evidence | Outcome |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | No verified implementation yet |
+| 2026-10-22 | 1 | Created VPC 10.0.0.0/16 and four /24 subnets via Terraform. Discovered unintended LAX Local Zone placement using AWS CLI; filtered standard AZs and replaced all four subnets. | [INC-001](docs/troubleshooting/INC-001-local-zone-subnet-placement.md), [GitHub incident #13](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/13) | Terraform apply succeeded; post-remediation CLI/no-drift check and actual Terraform code push pending |
 
 
 ## Repo-wide foundation verification (not phase completion)
 
 - 2026-10-12: [First CI run](https://github.com/dbates91/apex-aws-infrastructure-modernization/actions/runs/38218409414) completed successfully across four jobs: Python offline unit tests/documentation/Bash syntax, Terraform formatting and validation, Gitleaks secret scanning, and an **advisory** Checkov run. Passing the advisory job does **not** mean every IaC policy check passed.
-- No AWS provisioning, NAT/ALB/RDS deployment, Docker image build, endpoint connection, GitHub Project board, or actual failure drill was verified in this CI run.
-- All implementation phases remain **Not Started**; Phase 0's AWS account audit and budget gate are still pending.
+- The **2026-10-12 CI run** did not provision AWS resources. Separately, actual VPC and subnet provisioning and one configuration incident/remediation occurred **2026-10-22**, documented above. NAT/ALB/RDS, containers, endpoints, and full failure drills remain pending.
+- Phase 1 is **In Progress**, not complete. Other phases have not met completion criteria; Phase 0's full AWS account audit and budget gate still need documented review.
