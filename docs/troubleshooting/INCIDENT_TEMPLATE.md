@@ -29,5 +29,5 @@ Monitoring, configuration guardrails, runbooks and alerts.
 ## Interview response
 Summarize symptom → evidence → root cause → fix → prevention in 60–90 seconds.
 
-**Status:** Template; no real incident evidence yet.
+**Status:** Template for future incidents. The first actual lab configuration incident is documented in [INC-001](INC-001-local-zone-subnet-placement.md).
 
