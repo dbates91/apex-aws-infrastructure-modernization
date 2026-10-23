@@ -1,18 +1,18 @@
 # Apex — Official Development Roadmap
 
-**Status:** Phase plan only. All 11 phases are **Not Started**. Each phase advances only after a real configuration/deployment or demonstrable local test, actual verification, security and cost review, documentation, and an interview-ready explanation. Phases can span multiple study weeks; advanced high-cost options are discretionary.
+**Status (2026-10-22):** Phase 1 networking is **In Progress**: the VPC/four subnet Terraform deployments and INC-001 remediation have completed, but post-fix read-only verification, code push and routing remain pending. Other phases have not met their acceptance gates. **The [project tracker](PROJECT_TRACKER.md) is the authoritative implementation-status record.** Phases can span multiple study weeks; higher-cost services remain discretionary.
 
 | Phase | Topic | Bootcamp week | Current status |
 | --- | --- | --- | --- |
 | 0 | Foundation / cost audit | 1 | Not Started |
-| 1 | AWS networking | 1 | Not Started |
+| 1 | AWS networking | 1 | **In Progress — VPC/subnets deployed; routing pending** |
 | 2 | EC2 / Linux / IAM / SSM | 2 | Not Started |
 | 3 | Application / ALB / ASG | 3 | Not Started |
-| 4 | Terraform IaC | 3 | Not Started |
+| 4 | Terraform IaC | 3 | Not Started as a full repeatability milestone; **basic Terraform deployments performed in Phase 1** |
 | 5 | Docker / ECR | 4 | Not Started |
 | 6 | CloudWatch / CloudTrail / logging | 5 | Not Started |
 | 7 | Bash / Python automation | 5 | Not Started |
-| 8 | CloudOps incident simulation | 6 | Not Started |
+| 8 | CloudOps incident simulation | 6 | Not Started as a dedicated simulation phase; **actual configuration incident INC-001 completed at Phase 1** |
 | 9 | Failure testing / recovery / cost | 6 | Not Started |
 | 10 | Portfolio / interviews | 6 | Not Started |
 
@@ -24,9 +24,9 @@
 
 ## Phase 1 — VPC and networking
 
-**Build:** plan VPC 10.0.0.0/16 in two AZs, distinct public/app/DB subnet CIDRs, Internet Gateway, public and private route tables, NAT choice, endpoint options, DNS behavior, and SG reference rules.
+**Built so far:** `10.0.0.0/16` VPC and four subnets (`10.0.1.0/24`, `10.0.2.0/24`, `10.0.10.0/24`, `10.0.20.0/24`) via Terraform. Local Zone placement was corrected with a reviewed four-subnet replacement. **Remaining:** independently verify AZ placement/no drift, publish the local HCL, deploy IGW/public/private routes, review NAT/endpoints, and later security-group rules and optional DB subnet CIDRs.
 
-**Verify:** inspect routes, subnet associations, Internet path and SG boundaries with real outputs (after deployment); validate intended private isolation, cost implications, and teardown.
+**Verify:** start with [post-remediation network CLI checks](docs/deployment/NETWORK_VERIFICATION.md); then inspect routes, subnet associations, internet path and SG boundaries with real outputs **after those resources are deployed**, and assess isolation, cost, and teardown. [First incident](docs/troubleshooting/INC-001-local-zone-subnet-placement.md).
 
 ## Phase 2 — EC2, AL2023, IAM, SSM and Linux
 
