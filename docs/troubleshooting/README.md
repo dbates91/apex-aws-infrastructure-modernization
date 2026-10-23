@@ -1,6 +1,8 @@
 # Troubleshooting and CloudOps Incident Lab
 
-**Phase 8 — Not Started.** This directory will hold ticket-based drills rooted in actual observed behavior.
+**Phase 8 — Controlled drills not started.** This directory contains an actual Phase 1 provisioning/configuration incident as well as templates for future controlled CloudOps drills.
+
+- **[INC-001 — Unintended Local Zone subnet placement](INC-001-local-zone-subnet-placement.md):** AWS CLI discovery, Terraform filtering and replacement; actual Terraform apply succeeded; final AWS CLI/no-drift check pending. Also tracked in [GitHub issue #13](https://github.com/dbates91/apex-aws-infrastructure-modernization/issues/13).
 
 Use **Verify → Scope → Inspect → Isolate → Resolve → Validate → Document → Prevent**.
 
