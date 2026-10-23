@@ -1,38 +1,49 @@
-# Apex — Architecture Overview
+# Apex — AWS Architecture
 
-**Target design only.** No Apex AWS network or application exists yet.
+**Scope:** Independent, production-inspired AWS engineering lab for a fictional Linux application. **Current build ≠ target architecture.**
 
-## Goal
+## Current state — 2026-10-22
 
-Modernize a hypothetical Linux web application with secure tier separation, two Availability Zones, repeatable deployments, visibility, and explicit cost controls. The target VPC is `10.0.0.0/16`. The actual AWS Region, account, AZ identifiers, and final IP layout will be chosen at the Phase 0 design gate.
+A Terraform-managed VPC (`10.0.0.0/16`) and four subnets have been applied in `us-west-2`. An initial mistake selected Los Angeles Local Zones; the corrected Terraform plan selected two **standard regional Availability Zones** and its `apply` completed successfully. **The post-remediation read-only AWS CLI check and no-drift plan are still outstanding.**
 
-## Candidate network design
-
-| Tier | AZ A | AZ B | Routing concept |
+| Logical tier | AZ A target (`us-west-2a`) | AZ B target (`us-west-2b`) | Deployment evidence |
 | --- | --- | --- | --- |
-| Public | `10.0.0.0/24` | `10.0.1.0/24` | IGW for ALB; NAT gateways only if approved |
-| Application | `10.0.10.0/24` | `10.0.11.0/24` | No direct inbound from internet; outbound via scoped NAT or endpoints |
-| Database | `10.0.20.0/24` | `10.0.21.0/24` | No route to Internet gateway; private RDS subnet group |
- 
-CIDRs are non-overlapping **proposals**, not verified deployments. Route-table association, NACL defaults, IPv6 scope, endpoint DNS and AZ capacity are future validation tasks.
+| Public (routing pending) | `10.0.1.0/24` | `10.0.2.0/24` | Subnets created and replaced; no public IGW routes verified |
+| Private application (routing pending) | `10.0.10.0/24` | `10.0.20.0/24` | Subnets created and replaced; no outbound route or EC2 |
+| Database (optional) | CIDR not allocated | CIDR not allocated | Not deployed |
 
-## Intended traffic paths
+**Terminology:** A subnet becomes public for IPv4 internet egress when its effective route table points to an attached internet gateway **and** the instance has appropriate public addressing/security configuration. The `public`/`private` resource names by themselves do not establish network reachability.
 
-- Internet clients → Route 53 → HTTPS (443) ALB listener with ACM certificate → healthy targets on a private application port.
-- ALB security group: narrow inbound HTTP redirect (optional) and HTTPS from the internet; outbound only to application target port.
-- Application instance security group: inbound application port **from ALB SG**, not from `0.0.0.0/0`; outbound restricted to necessary destinations.
-- DB SG (optional): inbound database port from **application SG** only; no publicly accessible RDS instance.
-- Systems Manager: instance IAM role and SSM Agent with outbound network path. With no NAT, design interface endpoints for `ssm`, `ssmmessages`, and other services required by the chosen setup, including logging/KMS when applicable. Endpoint costs must be estimated.
-- HTTPS requires a valid owned domain and certificate; these are future optional costs.
-- ALB spanning two AZs and an ASG across AZs are an *availability design*, not demonstrated resilience.
+```mermaid
+flowchart TB
+  V["VPC 10.0.0.0/16"]
+  V --> A["AZ A · regional"]
+  V --> B["AZ B · regional"]
+  A --> PA["Public A · 10.0.1.0/24"]
+  A --> AA["Private app A · 10.0.10.0/24"]
+  B --> PB["Public B · 10.0.2.0/24"]
+  B --> AB["Private app B · 10.0.20.0/24"]
+```
 
-## NAT tradeoff
+**No IGW, NAT, route-table configuration, ALB, EC2, RDS or monitoring capability is claimed as deployed.** The VPC also has AWS-created default networking objects, which do not constitute our intended tier routing. [Verification checklist](../docs/deployment/NETWORK_VERIFICATION.md) · [INC-001](../docs/troubleshooting/INC-001-local-zone-subnet-placement.md).
 
-Single NAT can be cheaper in small labs but creates single-AZ egress dependency and may incur cross-AZ transfer. NAT per AZ improves fault isolation but increases fixed hourly expense. Private subnets also can use suitable VPC endpoints, with service-specific hourly and per-GB charges. Determine the practical cost and security tradeoff before provisioning.
+## Target architecture — not yet implemented
 
-## Optional advanced services
+1. Client → public Application Load Balancer (HTTPS with a verified ACM certificate and optional Route 53 record).
+2. ALB → private Linux EC2 application targets through narrowly scoped security-group rules.
+3. Systems Manager manages instances with instance-role permissions and a **tested outbound path** via correctly routed NAT or appropriate VPC interface endpoints.
+4. CloudWatch logs, alarms and operational runbooks provide observable failures and recovery checks.
+5. Optional Auto Scaling and RDS private database tier are introduced only with a justified and testable architecture.
 
-RDS with private subnet group and encryption, possibly Multi-AZ; ECR and ECS/Fargate after local Docker evidence; CloudWatch metrics/logging, CloudTrail, VPC Flow Logs and SNS.
+Two regional AZs offer a foundation for resilience, but **do not prove high availability** until a multi-AZ application is deployed and failures are tested.
 
-See [subnet and dependency checklist](networking-plan.md), [cost policy](../COST_MANAGEMENT.md), and [roadmap](../PROJECT_ROADMAP.md).
+## Key design decisions
 
+- **IaC first:** Terraform is the source of intended infrastructure, AWS CLI is the independent inspection tool. Do not manually create the same resources and accidentally manage them twice.
+- **Networking:** Public and private /24 CIDRs are deliberately spaced and non-overlapping. Local Zones are excluded from regional-AZ discovery using an explicit zone-type filter.
+- **Security:** Future application instances will not require publicly exposed SSH; verify real SSM access before claiming this capability.
+- **Outbound access:** One NAT versus NAT per AZ versus service-specific interface endpoints remains open. Compare operational dependencies and recurring costs before provisioning.
+- **State:** Initial local Terraform state is not checked into Git; an eventual S3 remote backend requires a deliberate migration and protections.
+- **Cost:** No actual cost savings, production traffic, uptime or incident SLA metrics have been measured.
+
+See [network plan](networking-plan.md), [cost guidance](../COST_MANAGEMENT.md), [incident report](../docs/troubleshooting/INC-001-local-zone-subnet-placement.md) and [roadmap](../PROJECT_ROADMAP.md).
