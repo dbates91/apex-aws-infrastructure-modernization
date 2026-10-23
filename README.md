@@ -1,26 +1,26 @@
 # Apex — AWS Infrastructure Modernization & Cost Optimization
 
-**Status: implementation not deployed** · [CI: passing static checks](https://github.com/dbates91/apex-aws-infrastructure-modernization/actions/runs/38218409414) · **Six-week AWS Cloud Engineering Bootcamp** · **Target roles: AWS Cloud Support / Junior CloudOps / Cloud Engineer**
+**Status: VPC and four subnets applied in AWS (2026-10-22); Phase 1 in progress** · [CI: passing static checks](https://github.com/dbates91/apex-aws-infrastructure-modernization/actions/runs/38218409414) · **Six-week AWS Cloud Engineering Bootcamp** · **Target roles: AWS Cloud Support / Junior CloudOps / Cloud Engineer**
 
 Apex is a **production-inspired, cost-conscious cloud modernization case study**: take a hypothetical manually managed Linux web service and design a secure, observable, reproducible AWS architecture. The business scenario is fictional; this is an independent portfolio project, not a deployed production service.
 
-> **Truth in engineering:** No Apex cloud resources have been provisioned or benchmarked. The initial code is a local web-service sample and **unattached Terraform networking module**; all cloud deployment phases remain **Not Started** until independently verified.
+> **Truth in engineering:** A custom VPC and four subnets were provisioned through Terraform in the user's AWS dev account on 2026-10-22. A Local Zone placement issue was discovered via AWS CLI and remediated by replacing four subnets (Terraform apply succeeded). **Post-remediation AWS CLI/no-drift verification and the push of the actual local Terraform code remain pending.** The GitHub default branch still contains the original non-deploying dev root; NAT, routing, compute, app, and production capabilities are **not deployed**. See [INC-001](docs/troubleshooting/INC-001-local-zone-subnet-placement.md) and [project tracker](PROJECT_TRACKER.md).
 
 ## At a glance
 
 | Capability | Engineering target | Verified state |
 | --- | --- | --- |
-| AWS networking | 10.0.0.0/16 VPC, public/app/DB subnets in two AZs, IGW, NAT/endpoints as justified | Planned; module source drafted, **not applied** |
+| AWS networking | 10.0.0.0/16 VPC, public/app/DB subnets in two AZs, IGW, NAT/endpoints as justified | **VPC + four public/private subnets applied locally via Terraform**; Local Zone placement remediated; routing/IGW/NAT/DB subnets still pending |
 | Compute / operations | Private Amazon Linux 2023 EC2, IAM instance profile, SSM and `systemd` | Not deployed |
 | Availability | Public HTTPS ALB, private targets, ASG across AZs, controlled failure drills | Not deployed or tested |
 | Application | Small Python HTTP app with `/health`, later hosted on Linux/Docker | Source included; cloud deployment pending |
-| Infrastructure as code | Terraform modules, reviewed plans, protected state and drift analysis | Starter code only; no resources applied |
+| Infrastructure as code | Terraform modules, reviewed plans, protected state and drift analysis | Terraform used for VPC/subnets and reviewed replacement plans; **working HCL not yet pushed to GitHub**; remote state/modules/drift review pending |
 | Containers | Dockerfile, local image verification, later ECR and optional ECS/Fargate | Definition included; no build/deployment claimed |
 | Security / audit | Scoped SG rules, least-privilege IAM, IMDSv2, encryption, CloudTrail / Flow Logs | Documentation and static checks; AWS controls not enabled |
 | Observability / response | CloudWatch / SNS, runbooks, verified incident tickets | Planned |
 | FinOps | Service estimates, resource tagging, teardown, before/after measurements | Planning templates; no actual AWS cost data |
 
-## Architecture — proposed, not deployed
+## Architecture — target; only the VPC and four subnets have been deployed
 
 ```mermaid
 flowchart TB
@@ -70,9 +70,9 @@ curl -i http://127.0.0.1:8080/health
 
 The HTTP sample uses Python's standard library and synthetic responses. Commands above are *instructions*, not claimed test results. You may also run `docker build -f docker/Dockerfile -t apex-local .` **locally**; no image build has been verified on GitHub.
 
-## Terraform (non-deploying root)
+## Terraform (local deployed work pending repository sync)
 
-`terraform/environments/dev/` contains only provider configuration and an informational output; it references **no modules or resources**. `terraform/modules/networking/` contains *draft* VPC/subnet/route/SG source code, but it is deliberately not attached to the dev root. This prevents an accidental `terraform apply` from provisioning the planned VPC at this stage.
+**On GitHub's default branch**, `terraform/environments/dev/` still contains only provider configuration and an informational output; it references **no modules or resources**. The user has since added VPC and subnet resource definitions **locally** in `feature/apex-network-foundation` and successfully used them to provision AWS resources. Those actual `.tf` changes must be committed and pushed before this repository can reproduce the deployed network. `terraform/modules/networking/` remains an unattached draft.
 
 ```bash
 terraform fmt -check -recursive terraform
@@ -81,7 +81,7 @@ terraform init -backend=false -input=false
 terraform validate
 ```
 
-**Do not run `terraform apply` until Phase 0 account/budget approval and explicit implementation review.** Remote state is not configured; avoid committing secrets, .tfstate or plans. CI runs only local static checks, Terraform validation and secret scanning, with **no cloud deployment**.
+For any further changes, confirm AWS identity/region, inspect the expected plan and account costs, then apply only reviewed changes. Remote state is not configured; **never commit Terraform state**, secrets or plans. CI runs static checks, Terraform validation and secret scanning, **not cloud deployment**.
 
 ## Security, cost, and operational proof
 
@@ -105,4 +105,4 @@ terraform validate
 | [docs/](docs/README.md) | Runbooks, incident reports, deployment records, decisions and portfolio |
 | [screenshots/](screenshots/README.md) | Redaction/evidence policy |
 
-**Project maturity:** Foundation and source examples, not a deployed AWS solution. This repo intentionally makes planned vs verified work obvious to technical interviewers. Certifications are learning goals—not represented as earned.
+**Project maturity:** Live AWS VPC + subnet foundation (with Terraform apply evidence), still awaiting code sync and final post-remediation CLI verification. Remaining architecture and production-style operation are not complete. This repo distinguishes planned from verified work for technical interviewers; certifications are learning goals, not represented as earned.
